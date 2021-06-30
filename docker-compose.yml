@@ -2,43 +2,43 @@ version: '3'
 
 services:
     web:
-        image: nginx:latest
-        container_name: nginx1.6
-        restart: always
+        image: nginx:1.17
+        container_name: nginx1.17_drupal
+        restart: on-failure
         ports:
-            - "5000:80"
+            - "81:80"
         volumes:
             - ./www:/var/www
-            - ./nginx1.6/site.conf:/etc/nginx/conf.d/site.conf
+            - ./nginx1.6/default.conf:/etc/nginx/conf.d/default.conf
         working_dir: /var/www
         networks:
           backend:
-            ipv4_address: 172.16.238.10
+            ipv4_address: 172.18.240.10
 
     php:
         build:
-            context: ./php7.3
+            context: ./php/8.0.6
             dockerfile: Dockerfile
-        container_name: php7.3
+        container_name: php8_drupal
         volumes:
             - ./www:/var/www
         networks:
           backend:
-            ipv4_address: 172.16.238.11
+            ipv4_address: 172.18.240.11
 
     db:
         image: mysql:5.7
-        container_name: mysql5.7
+        container_name: mysql5.7_drupal
         ports:
             - "3306:3306"
         environment:
             - MYSQL_ROOT_PASSWORD=root
-            - MYSQL_USER=root
+            - MYSQL_USER=drupal
         volumes:
             - ./mysql-data:/var/lib/mysql
         networks:
           backend:
-            ipv4_address: 172.16.238.12
+            ipv4_address: 172.18.240.12
 
     phpmyadmin:
         image: phpmyadmin/phpmyadmin
@@ -46,14 +46,14 @@ services:
         ports:
             - "8888:80"
         environment:
-            - PMA_HOST=172.16.238.1
+            - PMA_HOST=172.18.240.12
         networks:
           backend:
-            ipv4_address: 172.16.238.13
+            ipv4_address: 172.18.240.13
 
 networks:
     backend:
         ipam:
             driver: default
             config:
-                - subnet: "172.16.238.0/24"
+                - subnet: "172.18.240.0/24"
